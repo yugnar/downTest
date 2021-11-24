@@ -4,6 +4,8 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongo = require("mongoose");
 const passport = require("passport");
+const cron = require("node-cron");
+const request = require("request");
 
 mongo.connect(
   "mongodb+srv://uptime:uptime@uptime-cluster.fw0nz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
@@ -18,6 +20,23 @@ const signupRoute = require("./routes/register");
 const saveUrl = require("./routes/saveUrl");
 
 const app = express();
+
+const userSchema = require("./schemas/user.schemas");
+const emails = require("./utils/emailUtility");
+
+cron.schedule("*/5 * * * * *", () => {
+  userSchema.find({}, (err, users) => {
+    users.forEach((user) => {
+      user.urls.forEach((url) => {
+        request(url, function (err, res, body) {
+          if (!err && res.statusCode != 200) {
+            emails.sendEmailNotif(user.username, url);
+          }
+        });
+      });
+    });
+  });
+});
 
 app.use(logger("dev"));
 app.use(express.json());

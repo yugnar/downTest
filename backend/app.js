@@ -3,6 +3,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongo = require("mongoose");
+const passport = require("passport");
 
 mongo.connect(
   "mongodb+srv://uptime:uptime@uptime-cluster.fw0nz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(passport.initialize());
 
 require("./passport/logIn.password");
 require("./passport/register.passport");

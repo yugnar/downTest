@@ -1,10 +1,14 @@
 const passport = require("passport");
 const JwtStrat = require("passport-jwt").Strategy;
-const jwtExtractor = require("passport-jwt").ExtractJwt;
-const userSchema = require("../schemas/user.schemas");
+
+let cookieExtractor = (req) => {
+  let token = null;
+  if (req && req.cookies) token = req.cookies["session"];
+  return token;
+};
 
 const ops = {
-  jwtFromRequest: jwtExtractor.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractor,
   secretOrKey: "elrafamalo",
 };
 

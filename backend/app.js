@@ -7,10 +7,9 @@ const passport = require("passport");
 const cron = require("node-cron");
 const request = require("request");
 
-mongo.connect(
-  "mongodb+srv://uptime:uptime@uptime-cluster.fw0nz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-  () => console.log("conexion mongo")
-);
+require("dotenv").config();
+
+mongo.connect(process.env.MONGO_URL, () => console.log("conexion mongo"));
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");

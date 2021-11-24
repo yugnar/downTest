@@ -24,7 +24,7 @@ const app = express();
 const userSchema = require("./schemas/user.schemas");
 const emails = require("./utils/emailUtility");
 
-cron.schedule("*/5 * * * * *", () => {
+cron.schedule("*/55 * * * * *", () => {
   userSchema.find({}, (err, users) => {
     users.forEach((user) => {
       user.urls.forEach((url) => {
@@ -66,6 +66,8 @@ require("./passport/register.passport");
 require("./passport/jwt.passport");
 
 app.use("/", indexRouter);
+
+//app.use("/getActiveUser", getUser);
 app.use("/users", usersRouter);
 
 app.use("/login", loginRoute);

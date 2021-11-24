@@ -7,7 +7,7 @@ router.get("/", function (req, res, next) {
   if (req.user) {
     res.send("respond with a resource");
   } else {
-    res.send("no hay user");
+    res.send("No hay user + " + req.user);
   }
 });
 

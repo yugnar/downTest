@@ -43,7 +43,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(cors());
+let allowedOrigins = ["http://localhost:3001"];
+app.use(
+  cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        let msg = "Unallowed access from the specified Origin";
+        return callback(new Error(msg), false);
+      }
+
+      return callback(null, true);
+    },
+  })
+);
 app.use(passport.initialize());
 
 require("./passport/logIn.password");

@@ -1,4 +1,5 @@
-const router = require("express").Router;
+const express = require("express");
+let router = express.Router();
 const userSchema = require("../schemas/user.schemas");
 const passport = require("passport");
 

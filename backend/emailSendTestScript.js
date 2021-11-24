@@ -1,5 +1,5 @@
 const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey('SG.osYexCuWQTeygC0C2GYECQ.ySHAOYc_TsbeCdIIrjB6ZdWQaCmxuXxAIX0zSa74xdQ');
+sgMail.setApiKey('placeholder');
 const msg = {
   to: 'yugnar@outlook.com',
   from: 'A01339605@tec.mx',

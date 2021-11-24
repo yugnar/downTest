@@ -11,8 +11,8 @@ let signUpCallback = (username, password, done) => {
       password: password,
     });
 
-    let user = await newUser.save();
-    return done(null, user);
+    let users = await newUser.save();
+    return done(null, users);
   });
 };
 

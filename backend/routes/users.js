@@ -1,9 +1,18 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
+let passport = require("passport");
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  function (req, res, next) {
+    if (req.user) {
+      res.send("respond with a resource");
+    } else {
+      res.send("no hay user");
+    }
+  }
+);
 
 module.exports = router;

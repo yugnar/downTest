@@ -1,13 +1,20 @@
 var express = require("express");
 var router = express.Router();
+const userSchema = require("../schemas/user.schemas");
 let passport = require("passport");
 
 /* GET users listing. */
-router.get("/", function (req, res, next) {
+router.get("/", passport.authenticate("jwt", { session: false }), function (req, res, next) {
   if (req.user) {
-    res.send("respond with a resource");
+    userSchema.findById(req.user, async (err, doc) => {
+      if (err) return res.status(500).send("Server error");
+      if (doc) {
+        console.log(doc);
+        return res.send(doc);
+      }
+    });
   } else {
-    res.send("No hay user + " + req.user);
+    res.send("No hay user");
   }
 });
 

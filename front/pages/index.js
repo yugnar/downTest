@@ -11,7 +11,7 @@ import { InsertLinkOutlined } from "@mui/icons-material";
 import Link from 'next/link';
 import api from "../axios";
 
-//import { isWebUri } from "valid-url";
+import { isWebUri } from "valid-url";
 
 const CssTextField = styled(TextField)({
   "& label.Mui-focused": {
@@ -42,16 +42,25 @@ export default function Home() {
   const [successText, setSuccessText] = useState("Success!!");
   const [loadingStatus, setLoading] = React.useState(false);
 
+  const [showURLInput, setShowURLInput] = React.useState(false);
+  const [username, setUsername] = useState("");
+
   const loadUserState = () => {
     api
       .get("http://localhost:3000/users")
       .then((res) => {
-        console.log(res);
-      });
+        console.log("id - " + res.data.username);
+        console.log("status code - " + res.status);
+        setUsername(res.data.username);
+        setShowURLInput(true);
+      })
+      .catch((err) => {
+        console.log("Error status code - " + err.status);
+        setShowURLInput(false);
+      })
   }
 
   useEffect(() => {
-    console.log("Retrieving logged user info...");
     loadUserState();
   }, []);
 
@@ -60,7 +69,7 @@ export default function Home() {
     setUserURL(event.target.value);
   }
 
-  const shortenURL = () => {
+  const monitorURL = () => {
     setSuccessInfo(false);
     setLoading(true);
     if (userURL === null || userURL === "") {
@@ -90,44 +99,61 @@ export default function Home() {
     }
   };
 
-  const queryRoute = (url) => {
-    fetch("/api/checkUrl?queryUrl=" + url)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.route) {
-          setSuccessText("Your new URL has been created at: " + process.env.NEXT_PUBLIC_SHORTEN_BASE + data.route);
-          setSuccessInfo(true);
-          setLoading(false);
-        }
-        else {
-          setInvalidStatus(true);
-          setLoading(false);
-        }
-      });
+  const queryRoute = (url_formatted) => {
+    console.log("We building stuffz");
+
+    api
+      .post("http://localhost:3000/saveUrl", {
+        url: url_formatted,
+      })
+      .then((res) => {
+        setSuccessText("Your URL is now being monitored! ");
+        setSuccessInfo(true);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setInvalidStatus(true);
+        setLoading(false);
+      })
   };
 
   const _handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      shortenURL();
+      monitorURL();
     }
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.accountButtons}>
-        <Grid container justifyContent="flex-end">
-          <Link
-            href={'/auth/login'}
-            passHref>
-            <Button variant="outlined">Login</Button>
-          </Link>
-          <Link
-            href={'/auth/register'}
-            passHref>
-            <Button variant="contained" style={{ marginLeft: "10px" }}>Register</Button>
-          </Link>
-        </Grid>
-      </div>
+      {
+        !showURLInput ?
+          <div className={styles.accountButtons}>
+            <Grid container justifyContent="flex-end">
+              <Link
+                href={'/auth/login'}
+                passHref>
+                <Button variant="outlined">Login</Button>
+              </Link>
+              <Link
+                href={'/auth/register'}
+                passHref>
+                <Button variant="contained" style={{ marginLeft: "10px" }}>Register</Button>
+              </Link>
+            </Grid>
+          </div>
+          :
+          <div className={styles.accountButtons}>
+            <Grid container justifyContent="flex-end">
+              <p><strong>Bienvenido, {username}</strong></p>
+              <Link
+              href={'/history'}
+              passHref>
+              <Button variant="contained" style={{ marginLeft : "25px" }}>Ver Historial de Sitios</Button>
+            </Link>
+            </Grid>
+          </div>
+      }
+
       <Head>
         <title>Website Status Monitor</title>
         <meta name="description" content="Website Status Monitor" />
@@ -140,15 +166,20 @@ export default function Home() {
 
         <p className={styles.description}><strong>Enter a URL to monitor. If your website goes down, a message will be sent to your account's email automatically (checks every 5 minutes).</strong></p>
 
-        <CssTextField
-          fullWidth
-          label="URL"
-          id="custom-css-outlined-input"
-          value={userURL}
-          onChange={handleChange}
-          onKeyDown={_handleKeyDown}
-          style={{ padding: "20px" }}
-        />
+        {showURLInput ?
+          <CssTextField
+            fullWidth
+            label="URL"
+            id="custom-css-outlined-input"
+            value={userURL}
+            onChange={handleChange}
+            onKeyDown={_handleKeyDown}
+            style={{ padding: "20px" }}
+          /> :
+          <div>
+            You need to be logged in to start monitoring URLs!
+          </div>
+        }
 
         {successInfo ? (
           <Stack sx={{ width: "100%" }} spacing={2}>
@@ -163,16 +194,21 @@ export default function Home() {
           </Stack>
         ) : null}
 
-        <Fab
-          variant="extended"
-          className={styles.generateButton}
-          onClick={shortenURL}
-          disabled={loadingStatus}
-        >
-          <NavigationIcon sx={{ mr: 1 }} />
-          Monitor this URL
-          {loadingStatus ? <CircularProgress className={styles.loading} /> : null}
-        </Fab>
+        {showURLInput ?
+          <div>
+            <Fab
+              variant="extended"
+              className={styles.generateButton}
+              onClick={monitorURL}
+              disabled={loadingStatus}
+            >
+              <NavigationIcon sx={{ mr: 1 }} />
+              Monitor this URL
+              {loadingStatus ? <CircularProgress className={styles.loading} /> : null}
+            </Fab>            
+          </div>
+          : null
+        }
       </main>
     </div>
   );

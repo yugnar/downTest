@@ -24,13 +24,22 @@ const app = express();
 const userSchema = require("./schemas/user.schemas");
 const emails = require("./utils/emailUtility");
 
-cron.schedule("*/55 * * * * *", () => {
+cron.schedule("*/5 * * * *", () => {
   userSchema.find({}, (err, users) => {
     users.forEach((user) => {
       user.urls.forEach((url) => {
         request(url, function (err, res, body) {
           if (!err && res.statusCode != 200) {
             emails.sendEmailNotif(user.username, url);
+            let historyTable = user.downTable;
+            let newEntry = {
+              url: url,
+              date: new Date(Date.now()).toISOString(),
+            }
+            historyTable.push(newEntry);
+            userSchema.findByIdAndUpdate(user._id, {downTable : historyTable}, (err, updated) => {
+              console.log("Update succesful");
+            })
           }
         });
       });
@@ -67,7 +76,6 @@ require("./passport/jwt.passport");
 
 app.use("/", indexRouter);
 
-//app.use("/getActiveUser", getUser);
 app.use("/users", usersRouter);
 
 app.use("/login", loginRoute);
